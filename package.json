@@ -1,0 +1,50 @@
+{
+  "name": "n8n-nodes-resultary",
+  "version": "0.1.0",
+  "description": "n8n community node for reporting workflow runs to Resultary and reading independently verified outcome status",
+  "license": "MIT",
+  "homepage": "https://getresultary.com/n8n/",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "resultary",
+    "automation",
+    "outcome-verification"
+  ],
+  "author": {
+    "name": "Resultary",
+    "email": "support@getresultary.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PharmedAI/n8n-nodes-resultary.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease",
+    "test:runtime": "node --test tests/*.test.cjs"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": ["dist/credentials/ResultaryApi.credentials.js"],
+    "nodes": ["dist/nodes/Resultary/Resultary.node.js"]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "release-it": "20.2.0",
+    "typescript": "5.9.3",
+    "n8n-workflow": "*"
+  },
+  "peerDependencies": {"n8n-workflow": "*"},
+  "publishConfig": {"access": "public"},
+  "engines": {"node": ">=22.14"}
+}
