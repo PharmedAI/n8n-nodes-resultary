@@ -1,0 +1,44 @@
+name: Publish Resultary n8n community node
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - name: Use npm CLI compatible with Trusted Publishing
+        run: npm install --global 'npm@^11.5.1'
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+      - name: Verify package version matches release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          test "v$version" = "${{ github.event.release.tag_name }}"
+      - name: Type-check, build, lint and runtime-test
+        run: |
+          npm run check --if-present
+          npm run build
+          npm run lint
+          npm run test:runtime
+      - name: Inspect public tarball before upload
+        run: npm pack --dry-run --ignore-scripts
+      - name: Publish public package with OIDC provenance
+        run: npm publish --access public --provenance
