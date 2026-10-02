@@ -34,13 +34,15 @@ jobs:
           set -euo pipefail
           version="$(node -p "require('./package.json').version")"
           test "v$version" = "${{ github.event.release.tag_name }}"
-      - name: Type-check, build, lint and runtime-test
+      - name: Runtime tests
+        run: npm run test:runtime
+      - name: Publish through official n8n release command
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm run check --if-present
-          npm run build
-          npm run lint
-          npm run test:runtime
-      - name: Inspect public tarball before upload
-        run: npm pack --dry-run --ignore-scripts
-      - name: Publish public package with OIDC provenance
-        run: npm publish --access public --provenance
+          set -euo pipefail
+          if [ -n "$NPM_TOKEN" ]; then
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          fi
+          npm run release
