@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-resultary",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for reporting workflow runs to Resultary and reading independently verified outcome status",
   "license": "MIT",
   "homepage": "https://getresultary.com/n8n/",
