@@ -29,12 +29,18 @@
     "prepublishOnly": "n8n-node prerelease",
     "test:runtime": "node --test tests/*.test.cjs"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": ["dist/credentials/ResultaryApi.credentials.js"],
-    "nodes": ["dist/nodes/Resultary/Resultary.node.js"]
+    "credentials": [
+      "dist/credentials/ResultaryOAuth2Api.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Resultary/Resultary.node.js"
+    ]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
@@ -44,7 +50,13 @@
     "typescript": "5.9.3",
     "n8n-workflow": "*"
   },
-  "peerDependencies": {"n8n-workflow": "*"},
-  "publishConfig": {"access": "public"},
-  "engines": {"node": ">=22.14"}
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.14"
+  }
 }
