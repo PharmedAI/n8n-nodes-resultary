@@ -1,6 +1,11 @@
 name: Publish Resultary n8n community node
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - .github/workflows/publish.yml
   release:
     types: [published]
   workflow_dispatch:
@@ -23,20 +28,47 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
-      - name: Use npm CLI compatible with Trusted Publishing
-        run: npm install --global 'npm@^11.5.1'
-      - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Verify package version matches release tag
-        if: github.event_name == 'release'
+
+      - name: Decide whether this version needs publishing
+        id: version
         shell: bash
         run: |
           set -euo pipefail
-          version="$(node -p "require('./package.json').version")"
-          test "v$version" = "${{ github.event.release.tag_name }}"
+          local_version="$(node -p "require('./package.json').version")"
+          published_version="$(npm view n8n-nodes-resultary version 2>/dev/null || true)"
+          echo "local=$local_version" >> "$GITHUB_OUTPUT"
+          echo "published=$published_version" >> "$GITHUB_OUTPUT"
+          if [ "$local_version" = "$published_version" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "n8n-nodes-resultary@$local_version is already published; skipping."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing n8n-nodes-resultary@$local_version (current npm: ${published_version:-none})."
+          fi
+
+      - name: Verify package version matches release tag
+        if: github.event_name == 'release' && steps.version.outputs.publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "v${{ steps.version.outputs.local }}" = "${{ github.event.release.tag_name }}"
+
+      - name: Use npm CLI compatible with Trusted Publishing
+        if: steps.version.outputs.publish == 'true'
+        run: npm install --global 'npm@^11.5.1'
+
+      - name: Install dependencies
+        if: steps.version.outputs.publish == 'true'
+        run: npm install --ignore-scripts --no-audit --no-fund
+
       - name: Build before runtime tests
+        if: steps.version.outputs.publish == 'true'
         run: npm run build
+
       - name: Runtime tests
+        if: steps.version.outputs.publish == 'true'
         run: npm run test:runtime
+
       - name: Publish through official n8n release command
+        if: steps.version.outputs.publish == 'true'
         run: npm run release
