@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PharmedAI/n8n-nodes-resultary.git"
+    "url": "git+https://github.com/PharmedAI/n8n-nodes-resultary.git"
   },
   "scripts": {
     "build": "n8n-node build",
