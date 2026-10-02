@@ -31,3 +31,5 @@ jobs:
         run: npm run test:runtime
       - name: Inspect package
         run: npm pack --dry-run --ignore-scripts
+      - name: Scan published package with n8n verifier
+        run: npx --yes @n8n/scan-community-package n8n-nodes-resultary@0.1.0

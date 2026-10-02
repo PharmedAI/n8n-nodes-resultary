@@ -5,7 +5,7 @@ import {ApplicationError,NodeConnectionTypes,NodeOperationError} from 'n8n-workf
 
 const ID=/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 // Published connector must NEVER send its bearer token to an arbitrary URL.
-// This is a reserved product-owned hostname; the customer API is NOT live yet.
+// This is the fixed product-owned API hostname; customers cannot override it.
 const RESULTARY_API_ORIGIN='https://api.getresultary.com';
 
 function safeId(value:unknown,name:string):string {
