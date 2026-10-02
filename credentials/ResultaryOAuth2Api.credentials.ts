@@ -5,7 +5,7 @@ export class ResultaryOAuth2Api implements ICredentialType {
   extends = ['oAuth2Api'];
   displayName = 'Resultary OAuth2 API';
   icon: Icon = { light: 'file:../nodes/Resultary/resultary.svg', dark: 'file:../nodes/Resultary/resultary.dark.svg' };
-  documentationUrl = 'https://getresultary.com';
+  documentationUrl = 'https://getresultary.com/n8n/';
 
   properties: INodeProperties[] = [
     {
