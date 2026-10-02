@@ -1,49 +1,50 @@
-# Resultary n8n release checklist
+# Resultary n8n verification checklist
 
-This checklist is the final gate before publishing `n8n-nodes-resultary` to npm and submitting it for n8n community-node verification.
+This repository is the public source for `n8n-nodes-resultary`.
 
-## Connector package
+## Package status
 
-- [ ] `npm ci --ignore-scripts`
-- [ ] `npm run build`
-- [ ] `npm run lint`
-- [ ] `npm run test:runtime`
-- [ ] `npm pack --dry-run --ignore-scripts`
-- [ ] Package name remains `n8n-nodes-resultary`
-- [ ] Package contains only `dist` plus npm metadata
-- [ ] No API keys, invitation tokens, destination credentials or customer data in the package
-- [ ] Node remains pinned to `https://api.getresultary.com`
-- [ ] Redirects remain disabled
-- [ ] Credential is stored through n8n credentials, not workflow JSON
-- [ ] `Report Run` remains blocked during AI-tool execution
+- [x] Package name is `n8n-nodes-resultary`
+- [x] Package is public on npm
+- [x] Latest release is `0.1.1`
+- [x] Published from GitHub Actions with npm provenance
+- [x] npm Trusted Publisher is configured for `PharmedAI/n8n-nodes-resultary` and `publish.yml`
+- [x] No runtime dependencies
+- [x] MIT license
+- [x] Public GitHub repository matches npm metadata
+- [x] Package includes `n8n-community-node-package` keyword
+- [x] n8n node and credential entries are declared in `package.json`
+- [x] TypeScript build passes
+- [x] n8n lint passes
+- [x] Runtime tests pass
+- [x] Published package passes `@n8n/scan-community-package`
 
-## Hosted Resultary backend
+## Security
 
-- [ ] `https://api.getresultary.com/healthz` is healthy
-- [ ] Approved private integration can pass **Check Connection**
-- [ ] Revoked integration key is rejected
-- [ ] Fresh n8n run is accepted and isolated to its integration
-- [ ] Independent proof can produce **Healthy**
-- [ ] Missing independent proof can produce **Incident**
-- [ ] Restored independent proof can produce **Recovery**
-- [ ] Dashboard shows only the authenticated integration's data
-- [ ] Logs contain no secrets or customer payloads
-- [ ] Database runtime role is least-privilege
-- [ ] Backup/restore and operational alerting have been reviewed
+- [x] OAuth 2.0 Authorization Code with PKCE S256
+- [x] No API key copy/paste in the native node
+- [x] Fixed Resultary API hostname
+- [x] Bearer credentials are not forwarded across redirects
+- [x] No environment-variable access
+- [x] No file-system access
+- [x] No production dependencies
+- [x] `Report Run` uses trusted n8n execution/workflow IDs
+- [x] `Report Run` is blocked during AI-tool execution
 
-## Customer launch gate
+## Documentation
 
-- [ ] Final onboarding path is live
-- [ ] Support path is live
-- [ ] Privacy notice matches collected data
-- [ ] Public claims match actual monitoring/availability
-- [ ] Billing/entitlement is enabled before any paid production promise
-- [ ] Public production terms are ready
+- [x] README explains setup and OAuth authentication
+- [x] README includes example workflow patterns
+- [x] README documents operations
+- [x] README documents security boundaries
+- [x] Support, privacy and product links are public
+- [x] Documentation and node UI are English-only
 
-## Publication
+## Distribution
 
-- [ ] Publish `0.1.0` to npm
-- [ ] Install published package in a fresh disposable n8n instance
-- [ ] Run one fresh end-to-end smoke test against the published package
-- [ ] Submit package for n8n community-node verification
-- [ ] Update getresultary.com/n8n/ from private-beta wording only when the corresponding launch gate is complete
+- [x] `0.1.1` published through GitHub Actions
+- [x] Provenance signed by GitHub Actions
+- [x] Automatic OIDC-only publication is configured for future version bumps
+- [ ] Submit `n8n-nodes-resultary` in the n8n Creator Portal
+- [ ] n8n verification approved
+- [ ] Switch Resultary Cloud onboarding from temporary workflow import to native **Connect Resultary** path
