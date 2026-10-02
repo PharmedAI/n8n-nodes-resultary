@@ -4,6 +4,8 @@ import type {
 import {ApplicationError,NodeConnectionTypes,NodeOperationError} from 'n8n-workflow';
 
 const ID=/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+// Published connector must NEVER send its bearer token to an arbitrary URL.
+// This is a reserved product-owned hostname; the customer API is NOT live yet.
 const RESULTARY_API_ORIGIN='https://api.getresultary.com';
 
 function safeId(value:unknown,name:string):string {
@@ -13,6 +15,11 @@ function safeId(value:unknown,name:string):string {
   return value;
 }
 
+/**
+ * Private preview: thin n8n client for a SINGLE service, Resultary.
+ * Sending a run signal is never accepted as proof of downstream business
+ * success. Independently approved destination evidence stays server-side.
+ */
 export class Resultary implements INodeType {
   description:INodeTypeDescription={
     displayName:'Resultary',
@@ -26,7 +33,7 @@ export class Resultary implements INodeType {
     inputs:[NodeConnectionTypes.Main],
     outputs:[NodeConnectionTypes.Main],
     usableAsTool:true,
-    credentials:[{name:'resultaryApi',required:true}],
+    credentials:[{name:'resultaryOAuth2Api',required:true}],
     properties:[
       {
         displayName:'Operation',name:'operation',type:'options',
@@ -48,6 +55,7 @@ export class Resultary implements INodeType {
   async execute(this:IExecuteFunctions):Promise<INodeExecutionData[][]> {
     const input=this.getInputData();
     const result:INodeExecutionData[]=[];
+    // n8n stores the Resultary OAuth token in its credential manager; this code never logs or returns it.
     const origin=RESULTARY_API_ORIGIN;
     for(let itemIndex=0;itemIndex<input.length;itemIndex++){
       try{
@@ -56,10 +64,15 @@ export class Resultary implements INodeType {
         let path='/v1/integration';
         let body:Record<string,string>|undefined;
         if(operation==='report'){
+          // Community-node lint requires normal nodes to be usable as AI tools.
+          // A tool call must never be able to manufacture a transport signal,
+          // so Report Run is deliberately unavailable in AI-tool execution.
           if(this.isToolExecution()){
             throw new ApplicationError('Report Run is unavailable when Resultary is used as an AI tool');
           }
           method='POST';path='/v1/runs';
+          // Bind the signal to n8n's trusted execution context. Users and AI
+          // cannot override either identifier through editable node fields.
           body={
             executionId:safeId(this.getExecutionId(),'Execution ID'),
             workflowId:safeId(this.getWorkflow().id,'Workflow ID'),
@@ -70,16 +83,20 @@ export class Resultary implements INodeType {
           throw new ApplicationError('Unsupported Resultary operation');
         }
         const response=await this.helpers.httpRequestWithAuthentication.call(
-          this,'resultaryApi',{
+          this,'resultaryOAuth2Api',{
             method,url:origin+path,
             ...(body?{body}:{}),
             json:true,timeout:10000,
+            // n8n follows redirects with bearer credentials unless explicitly blocked.
             disableFollowRedirect:true,
             sendCredentialsOnCrossOriginRedirect:false,
             allowedDomains:'api.getresultary.com',
           }
         );
-        result.push({json:response as INodeExecutionData['json'],pairedItem:{item:itemIndex}});
+        result.push({
+          json:response as INodeExecutionData['json'],
+          pairedItem:{item:itemIndex},
+        });
       }catch(error){
         if(this.continueOnFail()){
           result.push({
@@ -88,6 +105,7 @@ export class Resultary implements INodeType {
           });
           continue;
         }
+        // Error is surfaced through n8n, not arbitrary HTML or telemetry.
         throw new NodeOperationError(this.getNode(),error as Error,{itemIndex});
       }
     }
