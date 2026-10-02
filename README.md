@@ -1,54 +1,64 @@
-# Resultary for n8n
+# Resultary for n8n — private release candidate
 
-Resultary is an n8n community-node connector for reporting workflow runs to Resultary and reading independently verified outcome status.
+**Not published yet.** This directory is the reviewed release candidate for the official Resultary n8n community node.
 
-> **Private beta release candidate.** The connector source is public and the Resultary API is live at `https://api.getresultary.com` for approved private-beta integrations. Public self-service signup, paid production entitlements and 24/7 monitoring are not enabled yet. Do not use Resultary for business-critical production workflows until the public production launch is announced.
+## Customer experience
+
+The native node is designed to remove the API-key copy/paste step.
+
+1. Add **Resultary** in n8n.
+2. Create the **Resultary** credential.
+3. Click **Connect my account**.
+4. Resultary authorizes n8n with OAuth 2.0 Authorization Code + PKCE.
+5. The credential is stored by n8n and the workflow can use Resultary immediately.
+
+The OAuth client ID is fixed to `resultary-n8n`. The connector does not ask customers for a client ID, client secret, Resultary API key, hostname, or proof-provider credential.
+
+For n8n Cloud the registered callback is:
+
+`https://oauth.n8n.cloud/oauth2/callback`
 
 ## Operations
 
-- **Report Run** — reports the current n8n execution/workflow IDs from trusted runtime context. This is a transport signal only, not proof of business success.
-- **Get Result** — reads the independently checked status for a previously returned Resultary run ID.
-- **Check Connection** — validates the scoped Resultary integration key.
+- **Report Run** — sends the current n8n execution ID and workflow ID from trusted n8n runtime context. It does not claim business success.
+- **Get Result** — reads the independently verified Resultary status for a previously reported run.
+- **Check Connection** — checks the authenticated Resultary integration.
 
-The connector never accepts a user-controlled API hostname. It is pinned to `https://api.getresultary.com`, blocks redirects, and does not expose the independent destination-read credential to n8n.
+Independent proof credentials remain server-side in Resultary and are never distributed in this package.
 
-## Private beta
+## OAuth security
 
-The current hosted backend supports approved private-beta integrations with scoped, revocable Resultary API keys. Access is intentionally controlled while final customer onboarding, continuous monitoring, entitlement/billing and production operations are completed.
+- OAuth 2.0 Authorization Code with PKCE S256.
+- Short-lived, single-use authorization codes.
+- The browser-to-Resultary setup session is HttpOnly, Secure, SameSite=Lax and scoped to `/oauth`.
+- Access tokens are returned only from the token endpoint and stored by n8n's credential manager.
+- No Resultary access token is placed in URLs, workflow JSON, source code, cookies, localStorage or sessionStorage.
+- The node sends authenticated requests only to `https://api.getresultary.com` and explicitly blocks cross-origin redirect credential forwarding.
 
-Private-beta testers must use disposable test workflows and an approved Resultary invitation. A successful `Report Run` only proves that Resultary received the n8n execution signal; business success is determined separately by Resultary's independent proof layer.
-
-## Development
-
-Requires Node.js 22.14 or newer.
+## Development validation
 
 ```sh
-npm ci --ignore-scripts
+cd integrations/n8n-nodes-resultary
+npm install --ignore-scripts
+npm run check
 npm run build
 npm run lint
 npm run test:runtime
-npm pack --dry-run --ignore-scripts
+node --test tests/package.test.cjs tests/public-release-template.test.cjs
 ```
 
-## Security
+The monorepo copy remains deliberately non-publishable: `private: true`, version `0.0.0-private`, and no publish script. The reviewed public handoff lives under `release/` and must be exported into the dedicated public repository before npm publication.
 
-Do not commit API keys, invitation tokens, destination credentials, customer data, or private Resultary backend configuration to this repository.
+## Publication
 
-AI Agent/tool execution is read-only for Resultary: **Report Run** is blocked when the node executes as an AI tool.
+Before external distribution:
 
-## Publication status
+1. keep the backend OAuth endpoints live and tested;
+2. validate the OAuth flow in a disposable n8n Cloud workspace;
+3. export only the connector source using `release/build-public-source.cjs`;
+4. push that export to the dedicated public `PharmedAI/n8n-nodes-resultary` repository;
+5. run official n8n node build/lint checks;
+6. publish with npm provenance / Trusted Publishing;
+7. submit the package for n8n verified-community-node review.
 
-Version `0.1.0` is the first public-package release candidate. Publish to npm only after the customer-facing backend release gate is complete and a fresh end-to-end check passes against `https://api.getresultary.com`.
-
-After npm publication, submit the package for n8n community-node verification so eligible users can discover and install it through n8n's integration experience.
-
-## Links
-
-- Product: https://getresultary.com
-- n8n: https://getresultary.com/n8n/
-- Support: https://getresultary.com/support/
-- Privacy: https://getresultary.com/privacy/
-
-## License
-
-MIT.
+The MIT license in this connector directory applies only to the distributable n8n client. It does not grant access to private Resultary SaaS backend code, hosting, databases, Paddle credentials or independent proof-provider credentials.
