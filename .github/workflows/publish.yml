@@ -39,12 +39,4 @@ jobs:
       - name: Runtime tests
         run: npm run test:runtime
       - name: Publish through official n8n release command
-        shell: bash
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -n "$NPM_TOKEN" ]; then
-            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          fi
-          npm run release
+        run: npm run release
